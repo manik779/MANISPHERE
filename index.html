@@ -4,544 +4,514 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>MANISPHERE — Computer Shop</title>
-  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet"/>
   <style>
     :root {
-      --bg:       #080b10;
-      --surface:  #0d1117;
-      --card:     #111820;
-      --border:   #1e2d3d;
-      --accent:   #00d4ff;
-      --accent2:  #ff6b35;
-      --glow:     rgba(0,212,255,0.18);
-      --text:     #c9d8e8;
-      --muted:    #4a6070;
-      --white:    #e8f4ff;
+      --bg:       #08050f;
+      --surface:  #0f0a1a;
+      --card:     #130e20;
+      --border:   rgba(139,92,246,0.15);
+      --accent:   #a855f7;
+      --accent2:  #f472b6;
+      --accent3:  #38bdf8;
+      --glow:     rgba(168,85,247,0.25);
+      --text:     #c4b5d4;
+      --muted:    #6b5a7e;
+      --white:    #f0e8ff;
     }
-
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     html { scroll-behavior: smooth; }
-
     body {
-      font-family: 'Rajdhani', sans-serif;
+      font-family: 'Syne', sans-serif;
       background: var(--bg);
       color: var(--text);
       overflow-x: hidden;
       cursor: none;
     }
 
-    /* Custom Cursor */
-    .cursor {
-      position: fixed; top: 0; left: 0; pointer-events: none; z-index: 9999;
+    /* ─── CURSOR ── */
+    #cursor-crosshair {
+      position: fixed; top: 0; left: 0;
+      pointer-events: none; z-index: 99999;
     }
-    .cursor-dot {
-      width: 8px; height: 8px;
+    #cursor-crosshair svg { transform: translate(-50%, -50%); }
+    #cursor-glow {
+      position: fixed; top: 0; left: 0;
+      width: 220px; height: 220px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(168,85,247,0.1) 0%, transparent 70%);
+      pointer-events: none; z-index: 9990;
+      transform: translate(-50%, -50%);
+    }
+    .cursor-trail {
+      position: fixed; border-radius: 50%;
       background: var(--accent);
-      border-radius: 50%;
+      pointer-events: none; z-index: 9995;
       transform: translate(-50%, -50%);
-      transition: transform 0.1s;
-      box-shadow: 0 0 10px var(--accent);
-    }
-    .cursor-ring {
-      width: 36px; height: 36px;
-      border: 1.5px solid var(--accent);
-      border-radius: 50%;
-      transform: translate(-50%, -50%);
-      transition: all 0.15s ease;
-      opacity: 0.6;
     }
 
-    /* Scanline overlay */
-    body::after {
-      content: '';
-      position: fixed; inset: 0;
-      background: repeating-linear-gradient(
-        0deg, transparent, transparent 2px,
-        rgba(0,0,0,0.04) 2px, rgba(0,0,0,0.04) 4px
-      );
-      pointer-events: none; z-index: 100;
+    /* ─── BG MESH ── */
+    .bg-mesh {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
     }
+    .bg-mesh::before {
+      content: ''; position: absolute; inset: -50%;
+      background:
+        radial-gradient(ellipse 60% 50% at 20% 30%, rgba(168,85,247,0.08) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 60% at 80% 70%, rgba(244,114,182,0.06) 0%, transparent 60%),
+        radial-gradient(ellipse 40% 40% at 60% 20%, rgba(56,189,248,0.05) 0%, transparent 50%);
+      animation: meshDrift 18s ease-in-out infinite alternate;
+    }
+    @keyframes meshDrift { 0%{transform:translate(0,0) scale(1)} 100%{transform:translate(3%,2%) scale(1.05)} }
 
-    /* ─── NAV ─────────────────────────────────── */
+    /* ─── NAV ── */
     nav {
       position: fixed; top: 0; width: 100%; z-index: 50;
       display: flex; align-items: center; justify-content: space-between;
-      padding: 1rem 4rem;
-      background: rgba(8,11,16,0.85);
-      backdrop-filter: blur(18px);
+      padding: 1.2rem 4rem;
+      background: rgba(8,5,15,0.72);
+      backdrop-filter: blur(24px) saturate(1.5);
       border-bottom: 1px solid var(--border);
     }
-
     .nav-logo {
-      font-family: 'Orbitron', monospace;
-      font-weight: 900; font-size: 1.5rem;
-      color: var(--white); letter-spacing: 0.15em;
+      font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.4rem;
+      color: var(--white); letter-spacing: 0.08em;
     }
-    .nav-logo span { color: var(--accent); }
-
+    .nav-logo span {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
     .nav-links { display: flex; gap: 2.5rem; list-style: none; }
     .nav-links a {
-      font-family: 'Share Tech Mono', monospace;
-      font-size: 0.78rem; letter-spacing: 0.12em;
-      color: var(--muted); text-decoration: none;
-      text-transform: uppercase;
-      transition: color 0.2s;
-      position: relative;
+      font-family: 'DM Mono', monospace; font-size: 0.72rem;
+      letter-spacing: 0.1em; color: var(--muted); text-decoration: none;
+      text-transform: uppercase; transition: color 0.25s; position: relative;
     }
     .nav-links a::after {
-      content: ''; position: absolute; bottom: -4px; left: 0;
-      width: 0; height: 1px; background: var(--accent);
-      transition: width 0.3s;
+      content: ''; position: absolute; bottom: -5px; left: 0;
+      width: 0; height: 1px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      transition: width 0.35s cubic-bezier(.4,0,.2,1);
     }
-    .nav-links a:hover { color: var(--accent); }
+    .nav-links a:hover { color: var(--white); }
     .nav-links a:hover::after { width: 100%; }
-
     .nav-cta {
-      font-family: 'Share Tech Mono', monospace;
-      font-size: 0.75rem; letter-spacing: 0.1em;
-      padding: 0.55rem 1.4rem;
-      border: 1px solid var(--accent);
-      color: var(--accent); background: transparent;
-      cursor: none; text-transform: uppercase;
-      transition: all 0.25s;
-      clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+      font-family: 'DM Mono', monospace; font-size: 0.72rem;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 0.6rem 1.6rem;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: var(--white); border: none; cursor: none; border-radius: 2px;
+      position: relative; overflow: hidden; transition: box-shadow 0.3s;
     }
-    .nav-cta:hover {
-      background: var(--accent); color: var(--bg);
-      box-shadow: 0 0 20px var(--glow);
+    .nav-cta::before {
+      content: ''; position: absolute; inset: 0;
+      background: rgba(255,255,255,0.15);
+      transform: translateX(-100%) skewX(-15deg); transition: transform 0.4s;
     }
+    .nav-cta:hover { box-shadow: 0 0 30px rgba(168,85,247,0.5); }
+    .nav-cta:hover::before { transform: translateX(150%) skewX(-15deg); }
 
-    /* ─── HERO ────────────────────────────────── */
+    /* ─── HERO ── */
     .hero {
-      min-height: 100vh;
-      display: flex; align-items: center;
-      padding: 8rem 4rem 4rem;
-      position: relative; overflow: hidden;
+      min-height: 100vh; display: flex; align-items: center;
+      padding: 8rem 4rem 4rem; position: relative; overflow: hidden;
     }
-
-    /* Grid background */
     .hero::before {
-      content: '';
-      position: absolute; inset: 0;
+      content: ''; position: absolute; inset: 0;
       background-image:
-        linear-gradient(var(--border) 1px, transparent 1px),
-        linear-gradient(90deg, var(--border) 1px, transparent 1px);
-      background-size: 60px 60px;
-      opacity: 0.4;
-      mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%);
+        linear-gradient(rgba(139,92,246,0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(139,92,246,0.06) 1px, transparent 1px);
+      background-size: 80px 80px;
+      mask-image: radial-gradient(ellipse 70% 70% at 50% 40%, black 20%, transparent 100%);
     }
-
-    /* Glowing orb */
-    .hero-orb {
-      position: absolute; top: 15%; right: 5%;
-      width: 520px; height: 520px;
-      background: radial-gradient(circle, rgba(0,212,255,0.08) 0%, transparent 70%);
-      border-radius: 50%;
-      animation: pulse 4s ease-in-out infinite;
+    .hero-content { position: relative; z-index: 2; max-width: 700px; }
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: 0.6rem;
+      font-family: 'DM Mono', monospace; font-size: 0.68rem;
+      letter-spacing: 0.3em; text-transform: uppercase;
+      color: var(--accent); margin-bottom: 1.8rem;
+      padding: 0.4rem 1rem;
+      border: 1px solid rgba(168,85,247,0.3); border-radius: 100px;
+      background: rgba(168,85,247,0.06);
     }
-    @keyframes pulse { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.08);opacity:0.7} }
-
-    .hero-content { position: relative; z-index: 2; max-width: 680px; }
-
-    .hero-tag {
-      font-family: 'Share Tech Mono', monospace;
-      font-size: 0.72rem; letter-spacing: 0.25em;
-      color: var(--accent); text-transform: uppercase;
-      margin-bottom: 1.2rem;
-      display: flex; align-items: center; gap: 0.8rem;
+    .hero-eyebrow::before {
+      content: ''; width: 6px; height: 6px; border-radius: 50%;
+      background: var(--accent); animation: blink 1.4s ease-in-out infinite;
     }
-    .hero-tag::before {
-      content: ''; display: block;
-      width: 2rem; height: 1px; background: var(--accent);
-    }
-
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
     .hero h1 {
-      font-family: 'Orbitron', monospace;
-      font-size: clamp(3rem, 6vw, 5.5rem);
-      font-weight: 900;
-      line-height: 1.0;
-      color: var(--white);
-      letter-spacing: -0.01em;
-      margin-bottom: 0.4rem;
+      font-family: 'Syne', sans-serif; font-size: clamp(3.2rem, 6.5vw, 6rem);
+      font-weight: 800; line-height: 0.95; color: var(--white);
+      letter-spacing: -0.03em; margin-bottom: 0.3rem;
     }
-    .hero h1 .accent { color: var(--accent); }
-    .hero h1 .accent2 { color: var(--accent2); }
-
+    .hero h1 .grad {
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 60%, var(--accent3) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .hero h1 .italic {
+      font-family: 'Instrument Serif', serif; font-style: italic;
+      font-weight: 400; font-size: 0.85em;
+    }
     .hero-sub {
-      font-size: 1.15rem; font-weight: 300;
-      color: var(--muted); line-height: 1.7;
-      margin: 1.5rem 0 2.5rem;
-      max-width: 480px;
+      font-size: 1.1rem; font-weight: 400; color: var(--muted);
+      line-height: 1.75; margin: 1.8rem 0 2.8rem; max-width: 460px;
     }
-
-    .hero-actions { display: flex; gap: 1rem; align-items: center; }
-
+    .hero-actions { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
     .btn-primary {
-      font-family: 'Orbitron', monospace;
-      font-size: 0.78rem; font-weight: 700;
-      letter-spacing: 0.12em; text-transform: uppercase;
-      padding: 0.9rem 2rem;
-      background: var(--accent); color: var(--bg);
-      border: none; cursor: none;
-      clip-path: polygon(12px 0%, 100% 0%, calc(100% - 12px) 100%, 0% 100%);
-      transition: all 0.25s;
+      font-family: 'Syne', sans-serif; font-size: 0.82rem; font-weight: 700;
+      letter-spacing: 0.08em; text-transform: uppercase; padding: 1rem 2.2rem;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: var(--white); border: none; cursor: none; border-radius: 2px;
+      transition: all 0.3s; position: relative; overflow: hidden;
     }
-    .btn-primary:hover { box-shadow: 0 0 30px rgba(0,212,255,0.5); transform: translateY(-2px); }
-
+    .btn-primary::after {
+      content: ''; position: absolute; inset: 0;
+      background: rgba(255,255,255,0.12);
+      transform: translateX(-100%) skewX(-15deg); transition: transform 0.4s;
+    }
+    .btn-primary:hover { box-shadow: 0 8px 40px rgba(168,85,247,0.45); transform: translateY(-2px); }
+    .btn-primary:hover::after { transform: translateX(150%) skewX(-15deg); }
     .btn-ghost {
-      font-family: 'Share Tech Mono', monospace;
-      font-size: 0.78rem; letter-spacing: 0.12em; text-transform: uppercase;
-      padding: 0.9rem 2rem;
+      font-family: 'DM Mono', monospace; font-size: 0.78rem;
+      letter-spacing: 0.1em; text-transform: uppercase; padding: 1rem 2.2rem;
       background: transparent; color: var(--text);
-      border: 1px solid var(--border); cursor: none;
-      transition: all 0.25s;
+      border: 1px solid var(--border); cursor: none; border-radius: 2px; transition: all 0.25s;
     }
-    .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-ghost:hover { border-color: var(--accent); color: var(--accent); background: rgba(168,85,247,0.05); }
+
+    /* Hero Visual */
+    .hero-visual {
+      position: absolute; right: 4rem; top: 50%; transform: translateY(-50%);
+      width: 420px; height: 420px; z-index: 1;
+    }
+    .hero-visual .ring {
+      position: absolute; border-radius: 50%; border: 1px solid;
+      animation: spinRing linear infinite;
+    }
+    .ring-1 { inset:  0px; border-color: rgba(168,85,247,0.2);  animation-duration: 20s; }
+    .ring-2 { inset: 40px; border-color: rgba(244,114,182,0.15); animation-duration: 14s; animation-direction: reverse; }
+    .ring-3 { inset: 90px; border-color: rgba(56,189,248,0.12);  animation-duration:  9s; }
+    .ring-1::before, .ring-2::before, .ring-3::before {
+      content: ''; position: absolute; top: -4px; left: 50%;
+      width: 7px; height: 7px; border-radius: 50%; transform: translateX(-50%);
+    }
+    .ring-1::before { background: var(--accent);  box-shadow: 0 0 14px var(--accent); }
+    .ring-2::before { background: var(--accent2); box-shadow: 0 0 12px var(--accent2); }
+    .ring-3::before { background: var(--accent3); box-shadow: 0 0 10px var(--accent3); }
+    @keyframes spinRing { from{transform:rotate(0)} to{transform:rotate(360deg)} }
+    .hero-visual .core {
+      position: absolute; inset: 130px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 5rem;
+      filter: drop-shadow(0 0 40px rgba(168,85,247,0.5));
+      animation: floatCore 3s ease-in-out infinite;
+    }
+    @keyframes floatCore { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
 
     .hero-stats {
-      position: absolute; bottom: 3rem; right: 4rem;
-      display: flex; gap: 3rem;
+      position: absolute; bottom: 3rem; right: 4rem; display: flex; gap: 3rem;
     }
     .stat-item { text-align: right; }
     .stat-num {
-      font-family: 'Orbitron', monospace;
-      font-size: 2rem; font-weight: 700;
-      color: var(--white);
+      font-family: 'Syne', sans-serif; font-size: 2.2rem; font-weight: 800;
+      background: linear-gradient(135deg, var(--white), var(--accent));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     }
-    .stat-num span { color: var(--accent); }
     .stat-label {
-      font-family: 'Share Tech Mono', monospace;
-      font-size: 0.65rem; letter-spacing: 0.2em;
-      color: var(--muted); text-transform: uppercase;
+      font-family: 'DM Mono', monospace; font-size: 0.6rem;
+      letter-spacing: 0.25em; color: var(--muted); text-transform: uppercase;
     }
 
-    /* ─── SECTION COMMONS ─────────────────────── */
-    section { padding: 6rem 4rem; }
-
+    /* ─── SECTION COMMONS ── */
+    section { padding: 7rem 4rem; position: relative; }
     .section-tag {
-      font-family: 'Share Tech Mono', monospace;
-      font-size: 0.68rem; letter-spacing: 0.3em;
-      color: var(--accent); text-transform: uppercase;
-      margin-bottom: 0.6rem;
+      font-family: 'DM Mono', monospace; font-size: 0.65rem;
+      letter-spacing: 0.3em; text-transform: uppercase; color: var(--accent);
+      margin-bottom: 0.8rem; display: flex; align-items: center; gap: 0.7rem;
+    }
+    .section-tag::before {
+      content: ''; width: 1.5rem; height: 1px;
+      background: linear-gradient(90deg, var(--accent), transparent);
     }
     .section-title {
-      font-family: 'Orbitron', monospace;
-      font-size: clamp(1.8rem, 3.5vw, 2.8rem);
-      font-weight: 700; color: var(--white);
-      line-height: 1.15; margin-bottom: 1rem;
+      font-family: 'Syne', sans-serif; font-size: clamp(1.9rem, 3.5vw, 3rem);
+      font-weight: 800; color: var(--white); line-height: 1.1;
+      margin-bottom: 1rem; letter-spacing: -0.02em;
     }
-    .section-title span { color: var(--accent); }
+    .section-title .grad {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
 
-    /* ─── TICKER ──────────────────────────────── */
+    /* ─── TICKER ── */
     .ticker {
-      background: var(--surface);
-      border-top: 1px solid var(--border);
-      border-bottom: 1px solid var(--border);
-      padding: 0.7rem 0; overflow: hidden;
+      background: var(--surface); border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border); padding: 0.8rem 0; overflow: hidden; position: relative;
     }
+    .ticker::before, .ticker::after {
+      content: ''; position: absolute; top: 0; bottom: 0; width: 80px; z-index: 2;
+    }
+    .ticker::before { left: 0; background: linear-gradient(90deg, var(--surface), transparent); }
+    .ticker::after  { right: 0; background: linear-gradient(-90deg, var(--surface), transparent); }
     .ticker-inner {
-      display: flex; gap: 4rem;
-      animation: ticker 28s linear infinite;
-      white-space: nowrap;
+      display: flex; gap: 3.5rem;
+      animation: ticker 32s linear infinite; white-space: nowrap;
     }
     @keyframes ticker { from{transform:translateX(0)} to{transform:translateX(-50%)} }
     .ticker-item {
-      font-family: 'Share Tech Mono', monospace;
-      font-size: 0.72rem; letter-spacing: 0.15em;
-      color: var(--muted); text-transform: uppercase;
-      display: flex; align-items: center; gap: 1rem;
+      font-family: 'DM Mono', monospace; font-size: 0.7rem;
+      letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted);
+      display: flex; align-items: center; gap: 0.8rem;
     }
-    .ticker-item::before { content:'◆'; color: var(--accent); font-size: 0.5rem; }
+    .ticker-item .dot { width: 4px; height: 4px; border-radius: 50%; background: var(--accent); }
 
-    /* ─── PRODUCTS ────────────────────────────── */
+    /* ─── PRODUCTS ── */
     #products { background: var(--bg); }
-    .products-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 3rem; }
-
-    .filter-tabs { display: flex; gap: 0.5rem; }
+    .products-header {
+      display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 3.5rem;
+    }
+    .filter-tabs { display: flex; gap: 0.4rem; }
     .filter-tab {
-      font-family: 'Share Tech Mono', monospace;
-      font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase;
-      padding: 0.45rem 1rem;
+      font-family: 'DM Mono', monospace; font-size: 0.68rem;
+      letter-spacing: 0.1em; text-transform: uppercase; padding: 0.45rem 1.1rem;
       background: transparent; color: var(--muted);
-      border: 1px solid var(--border); cursor: none;
-      transition: all 0.2s;
+      border: 1px solid var(--border); cursor: none; border-radius: 100px; transition: all 0.25s;
     }
     .filter-tab.active, .filter-tab:hover {
-      background: var(--accent); color: var(--bg);
-      border-color: var(--accent);
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: var(--white); border-color: transparent;
+      box-shadow: 0 4px 20px rgba(168,85,247,0.35);
     }
-
     .products-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 1.5px;
-      background: var(--border);
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 1.5rem;
     }
-
     .product-card {
-      background: var(--card);
-      padding: 2rem;
-      position: relative; overflow: hidden;
-      transition: all 0.3s;
-      cursor: none;
+      background: var(--card); border: 1px solid var(--border);
+      padding: 2rem; position: relative; overflow: hidden; border-radius: 4px;
+      transition: all 0.35s cubic-bezier(.4,0,.2,1); cursor: none;
     }
     .product-card::before {
-      content: '';
-      position: absolute; top: 0; left: 0;
-      width: 3px; height: 0;
-      background: var(--accent);
-      transition: height 0.3s;
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(168,85,247,0.04), rgba(244,114,182,0.04));
+      opacity: 0; transition: opacity 0.35s;
     }
-    .product-card:hover { background: #141e28; }
-    .product-card:hover::before { height: 100%; }
-    .product-card:hover .product-img { transform: scale(1.05); }
-
+    .product-card::after {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--accent), var(--accent2), transparent);
+      opacity: 0; transition: opacity 0.35s;
+    }
+    .product-card:hover {
+      border-color: rgba(168,85,247,0.4); transform: translateY(-6px);
+      box-shadow: 0 20px 60px rgba(168,85,247,0.15), 0 0 0 1px rgba(168,85,247,0.1);
+    }
+    .product-card:hover::before { opacity: 1; }
+    .product-card:hover::after  { opacity: 1; }
+    .product-card:hover .product-img { transform: scale(1.08) translateY(-4px); }
     .product-badge {
-      font-family: 'Share Tech Mono', monospace;
-      font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase;
-      padding: 0.25rem 0.6rem;
-      background: rgba(0,212,255,0.1);
-      border: 1px solid rgba(0,212,255,0.3);
-      color: var(--accent);
-      display: inline-block; margin-bottom: 1.5rem;
+      font-family: 'DM Mono', monospace; font-size: 0.58rem;
+      letter-spacing: 0.2em; text-transform: uppercase; padding: 0.25rem 0.7rem;
+      background: rgba(168,85,247,0.1); border: 1px solid rgba(168,85,247,0.25);
+      color: var(--accent); display: inline-block; margin-bottom: 1.5rem; border-radius: 100px;
     }
     .product-badge.hot {
-      background: rgba(255,107,53,0.1);
-      border-color: rgba(255,107,53,0.3);
-      color: var(--accent2);
+      background: rgba(244,114,182,0.1); border-color: rgba(244,114,182,0.25); color: var(--accent2);
     }
-
     .product-img {
-      width: 100%; aspect-ratio: 4/3;
-      display: flex; align-items: center; justify-content: center;
+      width: 100%; aspect-ratio: 4/3; display: flex; align-items: center; justify-content: center;
       font-size: 5rem; margin-bottom: 1.5rem;
-      transition: transform 0.3s;
-      filter: drop-shadow(0 0 20px rgba(0,212,255,0.2));
+      transition: transform 0.4s cubic-bezier(.4,0,.2,1);
+      filter: drop-shadow(0 0 24px rgba(168,85,247,0.25));
     }
-
     .product-name {
-      font-family: 'Orbitron', monospace;
-      font-size: 0.95rem; font-weight: 700;
-      color: var(--white); margin-bottom: 0.4rem;
-      line-height: 1.3;
+      font-family: 'Syne', sans-serif; font-size: 0.95rem; font-weight: 700;
+      color: var(--white); margin-bottom: 0.4rem; line-height: 1.3; letter-spacing: 0.02em;
     }
     .product-spec {
-      font-family: 'Share Tech Mono', monospace;
-      font-size: 0.7rem; color: var(--muted); margin-bottom: 1.5rem;
-      line-height: 1.8;
+      font-family: 'DM Mono', monospace; font-size: 0.68rem;
+      color: var(--muted); margin-bottom: 1.5rem; line-height: 1.9;
     }
     .product-footer { display: flex; justify-content: space-between; align-items: center; }
     .product-price {
-      font-family: 'Orbitron', monospace;
-      font-size: 1.3rem; font-weight: 700; color: var(--accent);
+      font-family: 'Syne', sans-serif; font-size: 1.4rem; font-weight: 800;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     }
-    .product-price .currency { font-size: 0.8rem; vertical-align: super; }
+    .product-price .currency { font-size: 0.75rem; vertical-align: super; }
     .add-btn {
-      font-family: 'Share Tech Mono', monospace;
-      font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase;
-      padding: 0.5rem 1rem;
+      font-family: 'DM Mono', monospace; font-size: 0.62rem;
+      letter-spacing: 0.1em; text-transform: uppercase; padding: 0.5rem 1.1rem;
       background: transparent; color: var(--accent);
-      border: 1px solid var(--accent); cursor: none;
-      transition: all 0.2s;
+      border: 1px solid rgba(168,85,247,0.35); cursor: none; border-radius: 100px; transition: all 0.25s;
     }
-    .add-btn:hover { background: var(--accent); color: var(--bg); }
+    .add-btn:hover {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: var(--white); border-color: transparent; box-shadow: 0 4px 20px rgba(168,85,247,0.35);
+    }
 
-    /* ─── SERVICES ────────────────────────────── */
+    /* ─── SERVICES ── */
     #services {
       background: var(--surface);
-      border-top: 1px solid var(--border);
-      border-bottom: 1px solid var(--border);
+      border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
     }
-
     .services-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-      gap: 1.5rem; margin-top: 3rem;
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+      gap: 1.5rem; margin-top: 3.5rem;
     }
-
     .service-card {
-      border: 1px solid var(--border);
-      padding: 2rem;
-      position: relative; overflow: hidden;
-      background: var(--card);
-      transition: all 0.3s; cursor: none;
+      border: 1px solid var(--border); padding: 2.2rem; position: relative; overflow: hidden;
+      background: rgba(19,14,32,0.6); backdrop-filter: blur(12px); border-radius: 4px;
+      transition: all 0.35s cubic-bezier(.4,0,.2,1); cursor: none;
     }
-    .service-card:hover { border-color: var(--accent); transform: translateY(-4px); }
-    .service-card:hover .service-icon { color: var(--accent); }
-
-    .service-corner {
-      position: absolute; top: 0; right: 0;
-      width: 30px; height: 30px;
-      border-top: 2px solid var(--accent);
-      border-right: 2px solid var(--accent);
-      opacity: 0; transition: opacity 0.3s;
+    .service-card::after {
+      content: ''; position: absolute; top: 0; left: 0; width: 60px; height: 60px;
+      background: radial-gradient(circle at 0% 0%, rgba(168,85,247,0.18), transparent 70%);
+      opacity: 0; transition: opacity 0.35s;
     }
-    .service-card:hover .service-corner { opacity: 1; }
-
+    .service-card:hover {
+      border-color: rgba(168,85,247,0.35); transform: translateY(-5px);
+      box-shadow: 0 16px 50px rgba(168,85,247,0.12);
+    }
+    .service-card:hover::after { opacity: 1; }
     .service-icon {
-      font-size: 2.2rem; margin-bottom: 1rem;
-      transition: color 0.3s;
+      font-size: 2.4rem; margin-bottom: 1.2rem; display: block;
+      transition: transform 0.35s; filter: drop-shadow(0 0 16px rgba(168,85,247,0.3));
     }
+    .service-card:hover .service-icon { transform: scale(1.1) rotate(-5deg); }
     .service-title {
-      font-family: 'Orbitron', monospace;
-      font-size: 0.9rem; font-weight: 700;
-      color: var(--white); margin-bottom: 0.7rem;
+      font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700;
+      color: var(--white); margin-bottom: 0.8rem;
     }
-    .service-desc {
-      font-size: 0.95rem; font-weight: 300;
-      color: var(--muted); line-height: 1.7;
-    }
+    .service-desc { font-size: 0.92rem; color: var(--muted); line-height: 1.75; }
 
-    /* ─── ABOUT ───────────────────────────────── */
+    /* ─── ABOUT ── */
     #about {
       display: grid; grid-template-columns: 1fr 1fr;
-      gap: 6rem; align-items: center;
-      background: var(--bg);
+      gap: 7rem; align-items: center; background: var(--bg);
     }
-
     .about-visual {
-      position: relative; display: flex;
-      align-items: center; justify-content: center;
+      position: relative; display: flex; align-items: center;
+      justify-content: center; min-height: 420px;
     }
-
     .about-ring {
-      width: 380px; height: 380px;
-      border: 1px solid var(--border);
-      border-radius: 50%;
-      position: absolute;
-      animation: spin 18s linear infinite;
+      width: 380px; height: 380px; border: 1px solid rgba(168,85,247,0.15);
+      border-radius: 50%; position: absolute; animation: spinRing 20s linear infinite;
     }
     .about-ring::after {
-      content: '';
-      position: absolute; top: -4px; left: 50%;
-      width: 8px; height: 8px;
-      background: var(--accent); border-radius: 50%;
-      box-shadow: 0 0 12px var(--accent);
-      transform: translateX(-50%);
+      content: ''; position: absolute; top: -5px; left: 50%;
+      width: 9px; height: 9px; background: var(--accent); border-radius: 50%;
+      transform: translateX(-50%); box-shadow: 0 0 16px var(--accent);
     }
-    @keyframes spin { from{transform:rotate(0)} to{transform:rotate(360deg)} }
-
     .about-ring-2 {
-      width: 280px; height: 280px;
-      border: 1px dashed var(--border);
-      border-radius: 50%;
-      position: absolute;
-      animation: spin 12s linear infinite reverse;
+      width: 270px; height: 270px; border: 1px dashed rgba(244,114,182,0.12);
+      border-radius: 50%; position: absolute; animation: spinRing 13s linear infinite reverse;
     }
-
+    .about-ring-2::after {
+      content: ''; position: absolute; bottom: -5px; right: 30%;
+      width: 7px; height: 7px; background: var(--accent2); border-radius: 50%;
+      box-shadow: 0 0 12px var(--accent2);
+    }
     .about-center {
-      position: relative; z-index: 2;
-      font-size: 5rem; text-align: center;
-      filter: drop-shadow(0 0 30px rgba(0,212,255,0.4));
+      position: relative; z-index: 2; font-size: 5.5rem;
+      filter: drop-shadow(0 0 40px rgba(168,85,247,0.5));
+      animation: floatCore 3.5s ease-in-out infinite;
     }
-
     .about-content p {
-      font-size: 1.05rem; line-height: 1.85;
-      color: var(--text); margin-bottom: 1.2rem;
+      font-size: 1.05rem; line-height: 1.85; color: var(--text); margin-bottom: 1.2rem;
     }
-
-    .about-list { list-style: none; margin-top: 1.5rem; }
+    .about-list { list-style: none; margin-top: 1.8rem; }
     .about-list li {
-      font-family: 'Share Tech Mono', monospace;
-      font-size: 0.78rem; letter-spacing: 0.08em;
-      color: var(--muted); padding: 0.5rem 0;
-      border-bottom: 1px solid var(--border);
-      display: flex; align-items: center; gap: 0.7rem;
+      font-family: 'DM Mono', monospace; font-size: 0.75rem; letter-spacing: 0.06em;
+      color: var(--muted); padding: 0.6rem 0; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 0.8rem; transition: color 0.2s;
     }
-    .about-list li::before { content: '▸'; color: var(--accent); }
-
-    /* ─── CONTACT ─────────────────────────────── */
-    #contact {
-      background: var(--surface);
-      border-top: 1px solid var(--border);
+    .about-list li:hover { color: var(--text); }
+    .about-list li::before {
+      content: ''; width: 5px; height: 5px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent2)); flex-shrink: 0;
     }
 
+    /* ─── CONTACT ── */
+    #contact { background: var(--surface); border-top: 1px solid var(--border); }
     .contact-grid {
       display: grid; grid-template-columns: 1fr 1.2fr;
-      gap: 5rem; margin-top: 3rem; align-items: start;
+      gap: 5rem; margin-top: 3.5rem; align-items: start;
     }
-
-    .contact-info { display: flex; flex-direction: column; gap: 1.5rem; }
-    .contact-item {
-      display: flex; gap: 1rem; align-items: flex-start;
-    }
+    .contact-info { display: flex; flex-direction: column; gap: 1.8rem; }
+    .contact-item { display: flex; gap: 1.2rem; align-items: flex-start; }
     .contact-icon {
-      font-size: 1.4rem;
-      flex-shrink: 0; margin-top: 0.1rem;
+      font-size: 1.5rem; flex-shrink: 0; margin-top: 0.1rem;
+      filter: drop-shadow(0 0 12px rgba(168,85,247,0.3));
     }
     .contact-detail-label {
-      font-family: 'Share Tech Mono', monospace;
-      font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase;
-      color: var(--accent); margin-bottom: 0.3rem;
+      font-family: 'DM Mono', monospace; font-size: 0.62rem;
+      letter-spacing: 0.25em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.35rem;
     }
-    .contact-detail-value {
-      font-size: 1rem; color: var(--text);
+    .contact-detail-value { font-size: 1rem; color: var(--text); line-height: 1.6; }
+    .contact-form {
+      display: flex; flex-direction: column; gap: 1.1rem;
+      background: rgba(19,14,32,0.5); border: 1px solid var(--border);
+      border-radius: 6px; padding: 2rem;
+      backdrop-filter: blur(16px); position: relative; overflow: hidden;
     }
-
-    .contact-form { display: flex; flex-direction: column; gap: 1rem; }
+    .contact-form::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--accent), var(--accent2), transparent);
+    }
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-
-    .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+    .form-group { display: flex; flex-direction: column; gap: 0.45rem; }
     .form-label {
-      font-family: 'Share Tech Mono', monospace;
-      font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase;
-      color: var(--muted);
+      font-family: 'DM Mono', monospace; font-size: 0.62rem;
+      letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted);
     }
     .form-input, .form-textarea {
-      background: var(--card);
-      border: 1px solid var(--border);
-      color: var(--text);
-      padding: 0.75rem 1rem;
-      font-family: 'Rajdhani', sans-serif;
-      font-size: 1rem;
-      outline: none; transition: border-color 0.2s;
-      cursor: none;
+      background: rgba(8,5,15,0.6); border: 1px solid var(--border);
+      color: var(--text); padding: 0.8rem 1rem;
+      font-family: 'Syne', sans-serif; font-size: 0.95rem;
+      outline: none; border-radius: 3px; transition: border-color 0.25s, box-shadow 0.25s; cursor: none;
     }
-    .form-input:focus, .form-textarea:focus { border-color: var(--accent); }
+    .form-input:focus, .form-textarea:focus {
+      border-color: rgba(168,85,247,0.5); box-shadow: 0 0 0 3px rgba(168,85,247,0.08);
+    }
     .form-textarea { height: 120px; resize: vertical; }
-
     .form-submit {
-      font-family: 'Orbitron', monospace;
-      font-size: 0.8rem; font-weight: 700;
-      letter-spacing: 0.15em; text-transform: uppercase;
-      padding: 1rem;
-      background: var(--accent); color: var(--bg);
-      border: none; cursor: none;
-      transition: all 0.25s;
-      clip-path: polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%);
+      font-family: 'Syne', sans-serif; font-size: 0.85rem; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase; padding: 1rem;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: var(--white); border: none; cursor: none; border-radius: 3px;
+      transition: all 0.3s; position: relative; overflow: hidden;
     }
-    .form-submit:hover { box-shadow: 0 0 25px rgba(0,212,255,0.4); transform: translateY(-2px); }
+    .form-submit::after {
+      content: ''; position: absolute; inset: 0;
+      background: rgba(255,255,255,0.12);
+      transform: translateX(-100%) skewX(-15deg); transition: transform 0.4s;
+    }
+    .form-submit:hover { box-shadow: 0 8px 40px rgba(168,85,247,0.45); transform: translateY(-2px); }
+    .form-submit:hover::after { transform: translateX(150%) skewX(-15deg); }
 
-    /* ─── FOOTER ──────────────────────────────── */
+    /* ─── FOOTER ── */
     footer {
-      background: var(--bg);
-      border-top: 1px solid var(--border);
-      padding: 2.5rem 4rem;
-      display: flex; justify-content: space-between; align-items: center;
+      background: var(--bg); border-top: 1px solid var(--border);
+      padding: 2.5rem 4rem; display: flex; justify-content: space-between; align-items: center;
     }
-    .footer-logo {
-      font-family: 'Orbitron', monospace;
-      font-size: 1.1rem; font-weight: 900; color: var(--white);
+    .footer-logo { font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 800; color: var(--white); }
+    .footer-logo span {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     }
-    .footer-logo span { color: var(--accent); }
     .footer-copy {
-      font-family: 'Share Tech Mono', monospace;
-      font-size: 0.65rem; letter-spacing: 0.15em; color: var(--muted);
+      font-family: 'DM Mono', monospace; font-size: 0.62rem; letter-spacing: 0.15em; color: var(--muted);
     }
     .footer-links { display: flex; gap: 1.5rem; }
     .footer-links a {
-      font-family: 'Share Tech Mono', monospace;
-      font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase;
-      color: var(--muted); text-decoration: none;
-      transition: color 0.2s;
+      font-family: 'DM Mono', monospace; font-size: 0.62rem;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--muted); text-decoration: none; transition: color 0.2s;
     }
     .footer-links a:hover { color: var(--accent); }
 
-    /* ─── ANIMATIONS ──────────────────────────── */
+    /* ─── ANIMATIONS ── */
     .fade-up {
-      opacity: 0; transform: translateY(30px);
-      transition: opacity 0.7s ease, transform 0.7s ease;
+      opacity: 0; transform: translateY(28px);
+      transition: opacity 0.7s cubic-bezier(.4,0,.2,1), transform 0.7s cubic-bezier(.4,0,.2,1);
     }
     .fade-up.visible { opacity: 1; transform: translateY(0); }
 
@@ -550,6 +520,7 @@
       .nav-links { display: none; }
       section { padding: 4rem 1.5rem; }
       .hero { padding: 7rem 1.5rem 4rem; }
+      .hero-visual { display: none; }
       .hero-stats { right: 1.5rem; gap: 1.5rem; }
       #about { grid-template-columns: 1fr; gap: 3rem; }
       .about-visual { display: none; }
@@ -561,12 +532,18 @@
 </head>
 <body>
 
-<!-- Custom Cursor -->
-<div class="cursor" id="cursor">
-  <div class="cursor-dot" id="cursorDot"></div>
-</div>
-<div class="cursor" id="cursorRing">
-  <div class="cursor-ring" id="cursorRingEl"></div>
+<div class="bg-mesh"></div>
+<div id="cursor-glow"></div>
+<div id="cursor-crosshair">
+  <svg width="34" height="34" viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="17" cy="17" r="15" stroke="rgba(168,85,247,0.45)" stroke-width="0.8" stroke-dasharray="5 4" id="c-ring-outer"/>
+    <line x1="17" y1="2"  x2="17" y2="9"  stroke="#a855f7" stroke-width="1.8" stroke-linecap="round"/>
+    <line x1="17" y1="25" x2="17" y2="32" stroke="#a855f7" stroke-width="1.8" stroke-linecap="round"/>
+    <line x1="2"  y1="17" x2="9"  y2="17" stroke="#a855f7" stroke-width="1.8" stroke-linecap="round"/>
+    <line x1="25" y1="17" x2="32" y2="17" stroke="#a855f7" stroke-width="1.8" stroke-linecap="round"/>
+    <circle cx="17" cy="17" r="2.5" fill="#f472b6" opacity="0.9"/>
+    <circle cx="17" cy="17" r="1"   fill="white"/>
+  </svg>
 </div>
 
 <!-- NAV -->
@@ -583,51 +560,47 @@
 
 <!-- HERO -->
 <section class="hero" id="home">
-  <div class="hero-orb"></div>
   <div class="hero-content">
-    <div class="hero-tag">Est. 2026 · Premium Hardware</div>
-    <h1>BUILD YOUR<br><span class="accent">DREAM</span><br><span class="accent2">MACHINE</span></h1>
+    <div class="hero-eyebrow">Est. 2026 · Premium Hardware</div>
+    <h1>BUILD YOUR<br><span class="grad">DREAM</span><br><span class="italic">Machine.</span></h1>
     <p class="hero-sub">High-performance computers, cutting-edge components, and expert tech solutions — engineered for the way you work and play.</p>
     <div class="hero-actions">
-      <button class="btn-primary" onclick="document.getElementById('products').scrollIntoView({behavior:'smooth'})">Shop Now</button>
+      <button class="btn-primary" onclick="document.getElementById('products').scrollIntoView({behavior:'smooth'})">Shop Now →</button>
       <button class="btn-ghost" onclick="document.getElementById('services').scrollIntoView({behavior:'smooth'})">Our Services</button>
     </div>
   </div>
+  <div class="hero-visual">
+    <div class="ring ring-1"></div>
+    <div class="ring ring-2"></div>
+    <div class="ring ring-3"></div>
+    <div class="core">🖥️</div>
+  </div>
   <div class="hero-stats">
-    <div class="stat-item">
-      <div class="stat-num">2K<span>+</span></div>
-      <div class="stat-label">Products</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-num">98<span>%</span></div>
-      <div class="stat-label">Satisfaction</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-num">7<span>yr</span></div>
-      <div class="stat-label">Experience</div>
-    </div>
+    <div class="stat-item"><div class="stat-num">2K+</div><div class="stat-label">Products</div></div>
+    <div class="stat-item"><div class="stat-num">98%</div><div class="stat-label">Satisfaction</div></div>
+    <div class="stat-item"><div class="stat-num">7yr</div><div class="stat-label">Experience</div></div>
   </div>
 </section>
 
 <!-- TICKER -->
 <div class="ticker">
   <div class="ticker-inner">
-    <span class="ticker-item">Intel Core i9 – 14th Gen</span>
-    <span class="ticker-item">AMD Ryzen 9 7950X</span>
-    <span class="ticker-item">NVIDIA RTX 5090</span>
-    <span class="ticker-item">Samsung 990 Pro NVMe</span>
-    <span class="ticker-item">G.Skill Trident Z5 RGB DDR5</span>
-    <span class="ticker-item">ASUS ROG Maximus Z790</span>
-    <span class="ticker-item">Corsair HX1200i PSU</span>
-    <span class="ticker-item">NZXT H9 Elite Case</span>
-    <span class="ticker-item">Intel Core i9 – 14th Gen</span>
-    <span class="ticker-item">AMD Ryzen 9 7950X</span>
-    <span class="ticker-item">NVIDIA RTX 5090</span>
-    <span class="ticker-item">Samsung 990 Pro NVMe</span>
-    <span class="ticker-item">G.Skill Trident Z5 RGB DDR5</span>
-    <span class="ticker-item">ASUS ROG Maximus Z790</span>
-    <span class="ticker-item">Corsair HX1200i PSU</span>
-    <span class="ticker-item">NZXT H9 Elite Case</span>
+    <span class="ticker-item"><span class="dot"></span>Intel Core i9 – 14th Gen</span>
+    <span class="ticker-item"><span class="dot"></span>AMD Ryzen 9 7950X</span>
+    <span class="ticker-item"><span class="dot"></span>NVIDIA RTX 5090</span>
+    <span class="ticker-item"><span class="dot"></span>Samsung 990 Pro NVMe</span>
+    <span class="ticker-item"><span class="dot"></span>G.Skill Trident Z5 RGB DDR5</span>
+    <span class="ticker-item"><span class="dot"></span>ASUS ROG Maximus Z790</span>
+    <span class="ticker-item"><span class="dot"></span>Corsair HX1200i PSU</span>
+    <span class="ticker-item"><span class="dot"></span>NZXT H9 Elite Case</span>
+    <span class="ticker-item"><span class="dot"></span>Intel Core i9 – 14th Gen</span>
+    <span class="ticker-item"><span class="dot"></span>AMD Ryzen 9 7950X</span>
+    <span class="ticker-item"><span class="dot"></span>NVIDIA RTX 5090</span>
+    <span class="ticker-item"><span class="dot"></span>Samsung 990 Pro NVMe</span>
+    <span class="ticker-item"><span class="dot"></span>G.Skill Trident Z5 RGB DDR5</span>
+    <span class="ticker-item"><span class="dot"></span>ASUS ROG Maximus Z790</span>
+    <span class="ticker-item"><span class="dot"></span>Corsair HX1200i PSU</span>
+    <span class="ticker-item"><span class="dot"></span>NZXT H9 Elite Case</span>
   </div>
 </div>
 
@@ -635,8 +608,8 @@
 <section id="products">
   <div class="products-header fade-up">
     <div>
-      <div class="section-tag">// Hardware Catalog</div>
-      <h2 class="section-title">Featured <span>Products</span></h2>
+      <div class="section-tag">Hardware Catalog</div>
+      <h2 class="section-title">Featured <span class="grad">Products</span></h2>
     </div>
     <div class="filter-tabs">
       <button class="filter-tab active">All</button>
@@ -645,9 +618,7 @@
       <button class="filter-tab">Peripherals</button>
     </div>
   </div>
-
   <div class="products-grid fade-up">
-
     <div class="product-card">
       <div class="product-badge hot">🔥 Best Seller</div>
       <div class="product-img">🖥️</div>
@@ -658,7 +629,6 @@
         <button class="add-btn">Add to Cart</button>
       </div>
     </div>
-
     <div class="product-card">
       <div class="product-badge">New Arrival</div>
       <div class="product-img">💻</div>
@@ -669,7 +639,6 @@
         <button class="add-btn">Add to Cart</button>
       </div>
     </div>
-
     <div class="product-card">
       <div class="product-badge">Featured</div>
       <div class="product-img">🎮</div>
@@ -680,7 +649,6 @@
         <button class="add-btn">Add to Cart</button>
       </div>
     </div>
-
     <div class="product-card">
       <div class="product-badge hot">Limited Stock</div>
       <div class="product-img">⚡</div>
@@ -691,7 +659,6 @@
         <button class="add-btn">Add to Cart</button>
       </div>
     </div>
-
     <div class="product-card">
       <div class="product-badge">Value Pick</div>
       <div class="product-img">🖱️</div>
@@ -702,7 +669,6 @@
         <button class="add-btn">Add to Cart</button>
       </div>
     </div>
-
     <div class="product-card">
       <div class="product-badge">Featured</div>
       <div class="product-img">🖨️</div>
@@ -713,60 +679,22 @@
         <button class="add-btn">Add to Cart</button>
       </div>
     </div>
-
   </div>
 </section>
 
 <!-- SERVICES -->
 <section id="services">
   <div class="fade-up">
-    <div class="section-tag">// What We Do</div>
-    <h2 class="section-title">Our <span>Services</span></h2>
+    <div class="section-tag">What We Do</div>
+    <h2 class="section-title">Our <span class="grad">Services</span></h2>
   </div>
   <div class="services-grid fade-up">
-
-    <div class="service-card">
-      <div class="service-corner"></div>
-      <div class="service-icon">🔧</div>
-      <div class="service-title">PC Repair & Diagnostics</div>
-      <div class="service-desc">Fast turnaround on all hardware repairs. Full diagnostics, component swaps, overheating fixes, and data recovery.</div>
-    </div>
-
-    <div class="service-card">
-      <div class="service-corner"></div>
-      <div class="service-icon">⚙️</div>
-      <div class="service-title">Custom PC Builds</div>
-      <div class="service-desc">We build the machine of your dreams — from budget workstations to extreme gaming rigs, tailored to your exact specs.</div>
-    </div>
-
-    <div class="service-card">
-      <div class="service-corner"></div>
-      <div class="service-icon">🛡️</div>
-      <div class="service-title">Security & Antivirus</div>
-      <div class="service-desc">Malware removal, system hardening, network security audits, and professional antivirus installation and setup.</div>
-    </div>
-
-    <div class="service-card">
-      <div class="service-corner"></div>
-      <div class="service-icon">📡</div>
-      <div class="service-title">Network Setup</div>
-      <div class="service-desc">Home and office networking, Wi-Fi optimization, NAS configuration, and enterprise-level LAN infrastructure.</div>
-    </div>
-
-    <div class="service-card">
-      <div class="service-corner"></div>
-      <div class="service-icon">💾</div>
-      <div class="service-title">Data Recovery</div>
-      <div class="service-desc">Recover files from damaged drives, failed SSDs, corrupted partitions, and accidentally deleted storage.</div>
-    </div>
-
-    <div class="service-card">
-      <div class="service-corner"></div>
-      <div class="service-icon">🎓</div>
-      <div class="service-title">Tech Consultation</div>
-      <div class="service-desc">Not sure what to buy or upgrade? Our experts will guide you to the best solution within your budget.</div>
-    </div>
-
+    <div class="service-card"><span class="service-icon">🔧</span><div class="service-title">PC Repair &amp; Diagnostics</div><div class="service-desc">Fast turnaround on all hardware repairs. Full diagnostics, component swaps, overheating fixes, and data recovery.</div></div>
+    <div class="service-card"><span class="service-icon">⚙️</span><div class="service-title">Custom PC Builds</div><div class="service-desc">We build the machine of your dreams — from budget workstations to extreme gaming rigs, tailored to your exact specs.</div></div>
+    <div class="service-card"><span class="service-icon">🛡️</span><div class="service-title">Security &amp; Antivirus</div><div class="service-desc">Malware removal, system hardening, network security audits, and professional antivirus installation and setup.</div></div>
+    <div class="service-card"><span class="service-icon">📡</span><div class="service-title">Network Setup</div><div class="service-desc">Home and office networking, Wi-Fi optimization, NAS configuration, and enterprise-level LAN infrastructure.</div></div>
+    <div class="service-card"><span class="service-icon">💾</span><div class="service-title">Data Recovery</div><div class="service-desc">Recover files from damaged drives, failed SSDs, corrupted partitions, and accidentally deleted storage.</div></div>
+    <div class="service-card"><span class="service-icon">🎓</span><div class="service-title">Tech Consultation</div><div class="service-desc">Not sure what to buy or upgrade? Our experts will guide you to the best solution within your budget.</div></div>
   </div>
 </section>
 
@@ -778,8 +706,8 @@
     <div class="about-center">💻</div>
   </div>
   <div class="about-content fade-up">
-    <div class="section-tag">// Our Story</div>
-    <h2 class="section-title">Why Choose <span>NEXCORE</span>?</h2>
+    <div class="section-tag">Our Story</div>
+    <h2 class="section-title">Why Choose <span class="grad">NEXCORE</span>?</h2>
     <p>NEXCORE was founded with one mission — to provide tech enthusiasts, professionals, and gamers with access to the very best hardware and expertise under one roof.</p>
     <p>From humble beginnings as a one-person repair shop, we've grown into a full-service computer store trusted by thousands of customers across the region.</p>
     <ul class="about-list">
@@ -796,8 +724,8 @@
 <!-- CONTACT -->
 <section id="contact">
   <div class="fade-up">
-    <div class="section-tag">// Reach Us</div>
-    <h2 class="section-title">Get In <span>Touch</span></h2>
+    <div class="section-tag">Reach Us</div>
+    <h2 class="section-title">Get In <span class="grad">Touch</span></h2>
   </div>
   <div class="contact-grid fade-up">
     <div class="contact-info">
@@ -819,7 +747,7 @@
         <div class="contact-icon">📧</div>
         <div>
           <div class="contact-detail-label">Email</div>
-          <div class="contact-detail-value">Manik779@gmail.com</div>
+          <div class="contact-detail-value">manisphere@gmail.com</div>
         </div>
       </div>
       <div class="contact-item">
@@ -853,7 +781,7 @@
         <label class="form-label">Message</label>
         <textarea class="form-textarea" placeholder="Describe your needs or questions..."></textarea>
       </div>
-      <button class="form-submit">Send Message ▸</button>
+      <button class="form-submit">Send Message →</button>
     </div>
   </div>
 </section>
@@ -870,19 +798,52 @@
 </footer>
 
 <script>
-  // Custom cursor
-  const dot = document.getElementById('cursorDot');
-  const ring = document.getElementById('cursorRingEl');
-  let mx = 0, my = 0, rx = 0, ry = 0;
+  /* ── CROSSHAIR CURSOR ── */
+  const crosshair = document.getElementById('cursor-crosshair');
+  const glowEl    = document.getElementById('cursor-glow');
+  const outerRing = document.getElementById('c-ring-outer');
+  let mx = 0, my = 0, gx = 0, gy = 0, rotation = 0, isHovering = false;
+
   document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+
+  /* Trail pool */
+  const TRAIL_COUNT = 7;
+  const trails = [];
+  for (let i = 0; i < TRAIL_COUNT; i++) {
+    const t = document.createElement('div');
+    t.className = 'cursor-trail';
+    const s = Math.max(2, 5 - i * 0.5);
+    t.style.cssText = `width:${s}px;height:${s}px;opacity:${0.45 - i*0.05};transition:left ${0.04+i*0.035}s linear,top ${0.04+i*0.035}s linear;`;
+    document.body.appendChild(t);
+    trails.push(t);
+  }
+
+  document.querySelectorAll('button,a,input,textarea,.product-card,.service-card,.filter-tab').forEach(el => {
+    el.addEventListener('mouseenter', () => isHovering = true);
+    el.addEventListener('mouseleave', () => isHovering = false);
+  });
+
   (function animCursor() {
-    dot.style.left = mx + 'px'; dot.style.top = my + 'px';
-    rx += (mx - rx) * 0.12; ry += (my - ry) * 0.12;
-    ring.style.left = rx + 'px'; ring.style.top = ry + 'px';
+    crosshair.style.left = mx + 'px';
+    crosshair.style.top  = my + 'px';
+    rotation += 0.5;
+    if (outerRing) outerRing.setAttribute('transform', `rotate(${rotation},17,17)`);
+    const scale = isHovering ? 1.7 : 1;
+    crosshair.querySelector('svg').style.transform = `translate(-50%,-50%) scale(${scale})`;
+    crosshair.querySelector('svg').style.transition = 'transform 0.2s cubic-bezier(.4,0,.2,1)';
+    gx += (mx - gx) * 0.07;
+    gy += (my - gy) * 0.07;
+    glowEl.style.left = gx + 'px';
+    glowEl.style.top  = gy + 'px';
+    trails.forEach(t => {
+      t.style.left = mx + 'px';
+      t.style.top  = my + 'px';
+      t.style.opacity = isHovering ? '0' : '';
+    });
     requestAnimationFrame(animCursor);
   })();
 
-  // Filter tabs
+  /* ── FILTER TABS ── */
   document.querySelectorAll('.filter-tab').forEach(tab => {
     tab.addEventListener('click', () => {
       document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
@@ -890,23 +851,25 @@
     });
   });
 
-  // Scroll fade-in
+  /* ── SCROLL FADE-IN ── */
   const observer = new IntersectionObserver(entries => {
     entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
-  }, { threshold: 0.12 });
+  }, { threshold: 0.1 });
   document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
 
-  // Add to cart feedback
+  /* ── ADD TO CART ── */
   document.querySelectorAll('.add-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const orig = btn.textContent;
       btn.textContent = '✓ Added';
-      btn.style.background = 'var(--accent)';
-      btn.style.color = 'var(--bg)';
+      btn.style.background = 'linear-gradient(135deg,#a855f7,#f472b6)';
+      btn.style.color = '#fff';
+      btn.style.borderColor = 'transparent';
       setTimeout(() => {
         btn.textContent = orig;
         btn.style.background = '';
         btn.style.color = '';
+        btn.style.borderColor = '';
       }, 1800);
     });
   });
